@@ -59,6 +59,16 @@ st.markdown("""
         to { opacity: 1; }
     }
     
+    @keyframes pulseGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px rgba(52, 199, 89, 0.3)); transform: scale(1); }
+        50% { filter: drop-shadow(0 0 35px rgba(52, 199, 89, 0.7)); transform: scale(1.01); }
+    }
+    
+    @keyframes slideUpFade {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
     [data-testid="stAppViewContainer"] {
         animation: fadeIn 0.8s ease-out;
     }
@@ -71,24 +81,34 @@ st.markdown("""
         color: white;
     }
     
-    /* Premium Glass Card - iPhone Style */
+    /* 3D Glass Card */
     .glass-card {
-        background: var(--glass-bg);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
         backdrop-filter: blur(var(--blur-amount));
         -webkit-backdrop-filter: blur(var(--blur-amount));
-        border: 1px solid var(--glass-border);
-        border-radius: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.4);
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+        border-right: 1px solid rgba(0, 0, 0, 0.4);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+        border-radius: 20px;
         padding: 24px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            15px 15px 35px rgba(0, 0, 0, 0.5),
+            inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+            inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transform-style: preserve-3d;
+        perspective: 1000px;
     }
     
     .glass-card:hover {
-        background: var(--glass-hover);
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-        transform: translateY(-4px);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+        box-shadow: 
+            25px 25px 50px rgba(0, 0, 0, 0.7),
+            inset 2px 2px 6px rgba(255, 255, 255, 0.3),
+            inset -2px -2px 6px rgba(0, 0, 0, 0.5);
+        transform: translateY(-8px) rotateX(4deg) rotateY(-2deg);
     }
     
     /* Header - Glowing Title */
@@ -101,7 +121,7 @@ st.markdown("""
         letter-spacing: -1.5px;
         color: white;
         text-shadow: 0 0 40px rgba(52, 199, 89, 0.3);
-        animation: fadeIn 1s ease-out;
+        animation: fadeIn 1s ease-out, pulseGlow 4s ease-in-out 1s infinite alternate;
     }
     
     .premium-subheader {
@@ -114,81 +134,129 @@ st.markdown("""
         animation: fadeIn 1.2s ease-out;
     }
     
-    /* Input Section Styling */
+    /* iOS 26 Input Section Styling */
     .input-section-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: white;
-        margin-bottom: 1.2rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.65);
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 1rem;
         margin-top: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 10px;
-        letter-spacing: 0.3px;
+        gap: 12px;
+        padding-left: 6px;
     }
     
     .input-section-icon {
-        font-size: 1.4rem;
-        opacity: 0.9;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 5px 8px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
     
-    /* Custom Input Styling - Glass Effect */
+    /* 3D Debossed Input Styling */
     [data-testid="stNumberInput"] input,
-    [data-testid="stSelectbox"] select,
-    [data-testid="stSlider"] input {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 12px !important;
-        padding: 12px 16px !important;
-        font-size: 0.95rem !important;
+    [data-testid="stSelectbox"] select {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: none !important;
+        border-radius: 16px !important;
+        padding: 16px 20px !important;
+        font-size: 1.05rem !important;
         color: white !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
         font-weight: 500 !important;
-        backdrop-filter: blur(10px) !important;
+        backdrop-filter: blur(40px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+        box-shadow: 
+            inset 4px 4px 10px rgba(0, 0, 0, 0.6), 
+            inset -2px -2px 6px rgba(255, 255, 255, 0.1),
+            0 1px 2px rgba(255, 255, 255, 0.1) !important;
     }
     
     [data-testid="stNumberInput"] input::placeholder,
     [data-testid="stSelectbox"] select::placeholder {
-        color: var(--text-secondary) !important;
+        color: rgba(255, 255, 255, 0.3) !important;
     }
     
     [data-testid="stNumberInput"] input:focus,
-    [data-testid="stSelectbox"] select:focus,
-    [data-testid="stSlider"] input:focus {
-        border-color: var(--success-glow) !important;
-        box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
-        background: rgba(255, 255, 255, 0.12) !important;
+    [data-testid="stSelectbox"] select:focus {
+        background: rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 
+            inset 6px 6px 14px rgba(0, 0, 0, 0.8), 
+            inset -3px -3px 8px rgba(255, 255, 255, 0.15),
+            0 0 10px rgba(52, 199, 89, 0.4),
+            0 1px 2px rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(1px);
     }
     
-    /* Glowing Button - iPhone Style */
-    .stButton > button {
-        background: rgba(52, 199, 89, 0.8);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 16px;
-        padding: 14px 32px;
-        font-size: 0.95rem;
-        font-weight: 600;
+    /* Dynamic Section Header */
+    .section-header {
+        font-size: 1.6rem;
+        font-weight: 700;
         color: white;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        min-height: 50px;
-        box-shadow: 0 0 0 rgba(52, 199, 89, 0.5),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        margin: 3.5rem 0 1.5rem 0;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.5) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+    .section-header::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 22px;
+        background: linear-gradient(180deg, #34C759, #00A86B);
+        border-radius: 6px;
+        box-shadow: 0 0 12px rgba(52,199,89,0.5);
+    }
+    
+    /* 3D Embossed Button */
+    .stButton > button {
+        background: linear-gradient(145deg, rgba(60, 215, 100, 1) 0%, rgba(40, 160, 70, 1) 100%) !important;
+        border: none !important;
+        border-radius: 16px !important;
+        padding: 14px 32px !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        color: white !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.8px !important;
+        min-height: 50px !important;
+        box-shadow: 
+            0 8px 15px rgba(0, 0, 0, 0.4),
+            inset 0 4px 6px rgba(255, 255, 255, 0.4),
+            inset 0 -4px 6px rgba(0, 0, 0, 0.2) !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
     }
     
     .stButton > button:hover {
-        background: rgba(52, 199, 89, 1);
-        box-shadow: 0 0 30px rgba(52, 199, 89, 0.6),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
+        background: linear-gradient(145deg, rgba(70, 230, 110, 1) 0%, rgba(45, 180, 80, 1) 100%) !important;
+        box-shadow: 
+            0 12px 25px rgba(0, 0, 0, 0.5),
+            inset 0 4px 6px rgba(255, 255, 255, 0.5),
+            inset 0 -4px 6px rgba(0, 0, 0, 0.3) !important;
+        transform: translateY(-4px) scale(1.02) !important;
     }
     
     .stButton > button:active {
-        transform: translateY(0);
+        background: linear-gradient(145deg, rgba(40, 160, 70, 1) 0%, rgba(60, 215, 100, 1) 100%) !important;
+        transform: translateY(4px) scale(0.98) !important;
+        box-shadow: 
+            0 2px 5px rgba(0, 0, 0, 0.3),
+            inset 0 6px 10px rgba(0, 0, 0, 0.5),
+            inset 0 -2px 4px rgba(255, 255, 255, 0.1) !important;
     }
     
     /* Result Card - Safe (Green Glow) */
@@ -218,11 +286,18 @@ st.markdown("""
     }
     
     @keyframes glassSlideIn {
-        from {
+        0% {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateY(40px) scale(0.85);
         }
-        to {
+        60% {
+            opacity: 1;
+            transform: translateY(-8px) scale(1.04);
+        }
+        80% {
+            transform: translateY(2px) scale(0.98);
+        }
+        100% {
             opacity: 1;
             transform: translateY(0) scale(1);
         }
@@ -253,25 +328,34 @@ st.markdown("""
         box-shadow: 0 0 20px rgba(255, 59, 48, 0.3);
     }
     
-    /* Metric Cards - Glass */
+    /* 3D Metric Card Layer */
     .metric-card {
-        background: var(--glass-bg);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--glass-border);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.4);
         border-radius: 20px;
         padding: 1.8rem;
         text-align: center;
-        transition: all 0.4s ease;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 
+            10px 10px 20px rgba(0, 0, 0, 0.4),
+            inset 1px 1px 3px rgba(255, 255, 255, 0.2),
+            inset -1px -1px 3px rgba(0, 0, 0, 0.2);
+        transform-style: preserve-3d;
+        perspective: 1000px;
     }
     
     .metric-card:hover {
-        background: var(--glass-hover);
-        transform: translateY(-6px);
-        box-shadow: 0 12px 48px rgba(52, 199, 89, 0.2),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+        transform: translateY(-8px) rotateX(5deg) scale(1.03);
+        box-shadow: 
+            20px 20px 40px rgba(0, 0, 0, 0.5),
+            inset 1px 1px 4px rgba(255, 255, 255, 0.3),
+            inset -1px -1px 4px rgba(0, 0, 0, 0.3);
     }
     
     .metric-value {
@@ -329,8 +413,9 @@ st.markdown("""
     }
     
     @keyframes glowFill {
-        from { width: 0; filter: brightness(1.2); }
-        to { width: inherit; filter: brightness(1); }
+        0% { width: 0; filter: brightness(1.5); box-shadow: 0 0 30px rgba(52, 199, 89, 0.8); }
+        80% { filter: brightness(1.2); box-shadow: 0 0 40px rgba(52, 199, 89, 0.7); }
+        100% { width: inherit; filter: brightness(1); box-shadow: 0 0 20px rgba(52, 199, 89, 0.5); }
     }
     
     /* Divider - Subtle Gradient */
@@ -405,7 +490,8 @@ st.markdown("""
 base_dir = os.path.dirname(__file__)
 model_path = os.path.join(base_dir, "model.pkl")
 scaler_path = os.path.join(base_dir, "scaler.pkl")
-encoders_path = os.path.join(base_dir, "label_encoders.pkl")
+encoders_path = os.path.join(base_dir, "encoder.pkl")
+metrics_path = os.path.join(base_dir, "metrics.pkl")
 
 try:
     with open(model_path, "rb") as f:
@@ -413,7 +499,15 @@ try:
     with open(scaler_path, "rb") as f:
         scaler = pickle.load(f)
     with open(encoders_path, "rb") as f:
-        label_encoders = pickle.load(f)
+        encoder = pickle.load(f)
+        
+    # Load metrics dynamically if available
+    try:
+        with open(metrics_path, "rb") as f:
+            model_metrics = pickle.load(f)
+    except FileNotFoundError:
+        model_metrics = {"Accuracy": "N/A", "Precision": "N/A", "Recall": "N/A", 
+                         "F1 Score": "N/A", "ROC AUC": "N/A", "Training Size": "N/A"}
 except FileNotFoundError as e:
     st.error(f"Error: Required file not found: {e}")
     st.info("Please ensure train.py has been executed in the backend directory.")
@@ -449,23 +543,23 @@ with st.sidebar:
     # Model Stats
     st.markdown("""
     <div class='sidebar-card'>
-        <div class='sidebar-title'>Model Metrics (Random Forest)</div>
+        <div class='sidebar-title'>Model Metrics (XGBoost)</div>
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Accuracy", "94.87%")
+        st.metric("Accuracy", model_metrics.get("Accuracy", "N/A"))
     with col2:
-        st.metric("Precision", "33.33%")
+        st.metric("Precision", model_metrics.get("Precision", "N/A"))
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Recall", "1.36%")
+        st.metric("Recall", model_metrics.get("Recall", "N/A"))
     with col2:
-        st.metric("F1 Score", "2.61%")
+        st.metric("F1 Score", model_metrics.get("F1 Score", "N/A"))
     
-    st.metric("ROC AUC Score", "53.19%")
-    st.metric("Training Size", "40,800 transactions")
+    st.metric("ROC AUC Score", model_metrics.get("ROC AUC", "N/A"))
+    st.metric("Training Size", model_metrics.get("Training Size", "N/A"))
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.divider()
@@ -475,7 +569,7 @@ with st.sidebar:
         <div class='sidebar-title'>Portfolio</div>
         <p class='secondary-text'>
         <strong>Built with:</strong> Streamlit, scikit-learn, SHAP<br><br>
-        <strong>Model:</strong> Logistic Regression<br><br>
+        <strong>Model:</strong> XGBoost<br><br>
         <strong>Purpose:</strong> Real-time fraud detection
         </p>
     </div>
@@ -545,7 +639,7 @@ with col1:
     
     location = st.selectbox(
         "Transaction City",
-        ["Boston", "Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco", "Seattle"],
+        ["Boston", "Chicago", "Houston", "India", "Los Angeles", "Miami", "New York", "San Francisco", "Seattle"],
         key="location",
         label_visibility="collapsed"
     )
@@ -617,7 +711,6 @@ with col2:
 if predict_button:
     # Loading animation
     with st.spinner("🔍 Analyzing transaction..."):
-        import time
         time.sleep(0.5)  # Smooth animation
         
         # Prepare features
@@ -638,8 +731,10 @@ if predict_button:
         # Encode
         categorical_cols = ['Transaction_Type', 'Device_Used', 'Location', 'Payment_Method']
         try:
-            for col in categorical_cols:
-                features_df[col] = label_encoders[col].transform(features_df[col])
+            cat_encoded = pd.DataFrame(
+                encoder.transform(features_df[categorical_cols]),
+                columns=encoder.get_feature_names_out(categorical_cols)
+            )
         except ValueError as e:
             st.error(f"Invalid input: {str(e)}")
             st.stop()
@@ -647,12 +742,10 @@ if predict_button:
         # Scale
         numerical_cols = ['Transaction_Amount', 'Time_of_Transaction', 'Previous_Fraudulent_Transactions', 
                           'Account_Age', 'Number_of_Transactions_Last_24H']
-        features_df[numerical_cols] = scaler.transform(features_df[numerical_cols])
-
-        # Reorder
-        feature_order = ['Transaction_Amount', 'Transaction_Type', 'Time_of_Transaction', 'Device_Used', 'Location', 
-                         'Previous_Fraudulent_Transactions', 'Account_Age', 'Number_of_Transactions_Last_24H', 'Payment_Method']
-        features_df = features_df[feature_order]
+        num_scaled = pd.DataFrame(scaler.transform(features_df[numerical_cols]), columns=numerical_cols)
+        
+        # Combine exact format used in train.py (numerical first, then categorical)
+        features_df = pd.concat([num_scaled, cat_encoded], axis=1)
 
         # Predict
         prediction = model.predict(features_df)[0]
@@ -749,37 +842,8 @@ if predict_button:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-    # SHAP Explanation
-    st.markdown("<div class='section-header'>🔬 Feature Importance</div>", unsafe_allow_html=True)
 
-    if not shap_available:
-        st.markdown("""
-        <div class='info-box'>
-        SHAP library not installed. Install with: <code>pip install shap</code> for ML interpretability analysis.
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        try:
-            with st.spinner("Generating SHAP analysis..."):
-                explainer = shap.Explainer(model, features_df)
-                shap_values = explainer(features_df)
-                
-                fig, ax = plt.subplots(figsize=(12, 5))
-                fig.patch.set_facecolor('none')
-                ax.set_facecolor('#0a0e27')
-                plt.tight_layout()
-                shap.plots.waterfall(shap_values[0], show=False)
-                st.pyplot(fig, use_container_width=True, transparent=True)
-                
-                st.markdown("""
-                <div class='info-box'>
-                <strong>How to read this chart:</strong> Each bar shows how features impact the prediction. Red increases fraud risk, blue decreases it.
-                </div>
-                """, unsafe_allow_html=True)
-        except Exception as e:
-            st.info(f"Could not generate SHAP explanation: {str(e)}")
 
     # Recommendation
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
@@ -797,4 +861,3 @@ if predict_button:
         <strong style='color: #34C759;'>APPROVE TRANSACTION</strong> - Process normally. Continue monitoring for pattern changes.
         </div>
         """, unsafe_allow_html=True)
-
