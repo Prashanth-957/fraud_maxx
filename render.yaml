@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: fraud-detection
-    runtime: python
-    pythonVersion: 3.11
-    startCommand: streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
