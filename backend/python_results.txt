@@ -1,0 +1,8 @@
+Testing /metrics endpoint:
+Status: 200
+Data: {'Accuracy': '55.57%', 'F1 Score': '9.58%', 'Precision': '5.34%', 'ROC AUC': '51.46%', 'Recall': '46.51%', 'Training Size': '77,612 transactions'}
+----------------------------------------
+Testing /predict endpoint:
+Status: 200
+Data: {'explanation': ['Extremely high transaction amount.', 'High-risk time window (late night).', 'Untrusted or anonymizing device detected.'], 'prediction': 0, 'probability': 0.26192477345466614}
+----------------------------------------

@@ -1,4 +1,4 @@
-# 💳 Sentinel Fraud Detection System
+# 💳 Saru Fraud Detection System
 
 A premium, full-stack machine learning-powered fraud detection application built with React, Vite, and XGBoost.
 
@@ -50,7 +50,7 @@ npm run dev
 ```
 *The React development server will start on port 5173.*
 
-Open your browser to `http://localhost:5173` to view the Sentinel Dashboard.
+Open your browser to `http://localhost:5173` to view the Saru Dashboard.
 
 ## Features
 
@@ -74,7 +74,7 @@ fraud/
 │   └── Fraud.csv           # Training dataset
 ├── frontend/               # Full Vite + React project
 │   ├── src/                
-│   │   ├── App.tsx         # Main Sentinel UI Hub
+│   │   ├── App.tsx         # Main Saru UI Hub
 │   │   ├── index.css       # Global Tailwind theme logic
 │   │   └── main.tsx        # React Root
 │   ├── package.json        
