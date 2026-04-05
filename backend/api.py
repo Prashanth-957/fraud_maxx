@@ -8,8 +8,12 @@ from geopy.distance import geodesic
 import traceback
 
 app = Flask(__name__)
-# Enable CORS so the React app on 5173 can talk to 5000
-CORS(app)
+# Enable CORS for Netlify frontend and local development
+CORS(app, origins=[
+    "https://scintillating-taffy-24e8b5.netlify.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
+])
 
 @app.route('/', methods=['GET'])
 def index():
