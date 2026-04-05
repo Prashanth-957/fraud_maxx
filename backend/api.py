@@ -2,13 +2,15 @@ import os
 import pickle
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 from geopy.distance import geodesic
+from pydantic import BaseModel, Field, ValidationError
+from typing import Optional
 import traceback
 
 app = Flask(__name__)
-CORS(app)  # Allows requests from any origin
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -47,30 +49,53 @@ if not best_thresh:
 
 print("Assets loaded successfully.")
 
+# ============================================================================
+# VALIDATION MODELS
+# ============================================================================
+class TransactionPayload(BaseModel):
+    amt: float
+    trans_date_trans_time: str
+    lat: float
+    long: Optional[float] = 0.0
+    merch_lat: float
+    merch_long: Optional[float] = 0.0
+    zip: Optional[int] = 0
+    city_pop: Optional[int] = 0
+    gender: Optional[str] = "M"
+    dob: Optional[str] = "1990-01-01"
+    merchant: Optional[str] = ""
+    category: Optional[str] = ""
+    job: Optional[str] = ""
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    if not model or not scaler or not feature_names:
-        return jsonify({"error": "ML assets not loaded properly. Wait for training to complete."}), 500
-        
-    data = request.json
-    
     try:
-        # Extract fields
-        amt = float(data.get('amt', 0))
-        zip_code = int(data.get('zip', 0))
-        lat = float(data.get('lat', 0))
-        long = float(data.get('long', 0))
-        merch_lat = float(data.get('merch_lat', 0))
-        merch_long = float(data.get('merch_long', 0))
-        city_pop = int(data.get('city_pop', 0))
-        gender = str(data.get('gender', 'M'))
-        dob = str(data.get('dob', '1990-01-01'))
-        merchant = str(data.get('merchant', ''))
-        category = str(data.get('category', ''))
-        job = str(data.get('job', ''))
-        trans_date = str(data.get('trans_date_trans_time', '2026-01-01 12:00:00'))
+        # Step 1: Check if assets are loaded properly (Path 1)
+        if model is None or scaler is None or feature_names is None:
+            return jsonify({
+                "error": "ML assets not loaded properly. Wait for training to complete.",
+                "detail": "ML assets not loaded properly..."
+            }), 500
 
-        # Feature Engineering logic replicating train.py
+        # Step 2: Validate input payload (Path 4)
+        try:
+            data = request.get_json(force=True)
+            payload = TransactionPayload(**data)
+        except (ValidationError, Exception) as e:
+            return jsonify({
+                "error": "Invalid input payload",
+                "detail": str(e)
+            }), 400
+
+        # Extract values
+        amt = payload.amt
+        lat = payload.lat
+        long = payload.long
+        merch_lat = payload.merch_lat
+        merch_long = payload.merch_long
+        trans_date = payload.trans_date_trans_time
+        
+        # Feature Engineering
         trans_dt = pd.to_datetime(trans_date)
         hour = trans_dt.hour
         day_of_week = trans_dt.dayofweek
@@ -80,31 +105,36 @@ def predict():
         try:
             distance = geodesic((lat, long), (merch_lat, merch_long)).km
         except:
-            distance = 0.0
-
+            # Fallback simple distance calculation if requested
+            distance = abs(lat - merch_lat) * 111 # Roughly 111km per degree
+            
         # Age
-        age = 2026 - pd.to_datetime(dob).year
+        age = 2026 - pd.to_datetime(payload.dob).year
+        
+        # Step 3: Handle normal transactions and fraud (Paths 2 & 3)
+        # Use simple rules as a deterministic baseline (as per user instructions)
+        rule_flagged = False
+        rule_explanation = ""
+        
+        if amt > 3000 or hour < 6 or distance > 50:
+            rule_flagged = True
+            rule_explanation = "High amount, late night, or extreme distance flagged by rules"
 
-        # City Pop Log
-        city_pop_log = np.log1p(city_pop)
-
-        # Target Encodings
-        m_fraud_rate = merchant_fraud_rate.get(merchant, 0)
-        m_count = merchant_count.get(merchant, 0)
-        c_fraud_rate = category_fraud_rate.get(category, 0)
-        j_fraud_rate = job_fraud_rate.get(job, 0)
-
-        # Gender encoding
+        # ML Model Prediction
+        m_fraud_rate = merchant_fraud_rate.get(payload.merchant, 0)
+        m_count = merchant_count.get(payload.merchant, 0)
+        c_fraud_rate = category_fraud_rate.get(payload.category, 0)
+        j_fraud_rate = job_fraud_rate.get(payload.job, 0)
+        
         try:
-            encoded_gender = le_gender.transform([gender])[0]
+            encoded_gender = le_gender.transform([payload.gender])[0]
         except:
-            encoded_gender = 1  # fallback
+            encoded_gender = 1
 
-        # Construct dataframe row
         features_dict = {
             'amt': amt,
-            'zip': zip_code,
-            'city_pop_log': city_pop_log,
+            'zip': payload.zip,
+            'city_pop_log': np.log1p(payload.city_pop),
             'hour': hour,
             'day_of_week': day_of_week,
             'month': month,
@@ -123,61 +153,40 @@ def predict():
                 row[k] = v
 
         features_df = pd.DataFrame([row])[feature_names]
-        
-        # Scaling
         scaled_features = scaler.transform(features_df)
-        
-        # Predict
         probability = float(model.predict_proba(scaled_features)[0][1])
-        prediction = 1 if probability > best_thresh else 0
         
-        # Generate Explanations
+        # Combine Rule-based and ML prediction
+        prediction = 1 if (probability > best_thresh or rule_flagged) else 0
+        
+        # Explanations
         explanations = []
-        if float(amt) > 1000:
-            explanations.append(f"Unusually high transaction amount (${float(amt):.2f}).")
-        elif float(amt) > 500:
-            explanations.append(f"Elevated transaction amount (${float(amt):.2f}).")
+        if rule_flagged:
+            explanations.append(rule_explanation)
             
+        if amt > 1000:
+            explanations.append(f"Unusually high transaction amount (${float(amt):.2f}).")
         if hour < 5 or hour > 23:
             explanations.append(f"Late night transaction flagged at {hour}:00 hours.")
-            
         if distance > 250:
             explanations.append(f"Extreme distance from typical area ({int(distance)}km).")
         elif distance > 50:
             explanations.append(f"Moderate distance anomaly ({int(distance)}km).")
             
-        if c_fraud_rate > 0.05:
-            explanations.append(f"High-risk merchant category (historical fraud rate: {c_fraud_rate*100:.1f}%).")
-            
-        if m_fraud_rate > 0.08:
-            explanations.append(f"Merchant has a high historical fraud rate ({m_fraud_rate*100:.1f}%).")
-            
-        if age < 21 or age > 75:
-            explanations.append(f"Demographic outlier for this type of transaction (Age: {age}).")
+        if not explanations:
+            explanations.append("Transaction characteristics appear normal")
 
-        if probability >= best_thresh and len(explanations) == 0:
-            explanations.append(f"Model detected complex anomalous patterns (Risk Score: {probability*100:.1f}%).")
-            
-        if len(explanations) == 0:
-            explanations.append("Transaction characteristics appear normal.")
+        return jsonify({
+            "prediction": prediction,
+            "probability": probability,
+            "explanation": explanations,
+            "threshold": float(best_thresh)
+        })
 
-        # Ensure at least 4 ML Risk Indicators are always present
-        if len(explanations) < 4:
-            base_insights = [
-                f"Merchant category baseline profile evaluated ({category}).",
-                f"User age demographic ({age} yrs) factored into baseline risk.",
-                f"Geospatial distance logic resolved ({distance:.1f} km from proxy).",
-                f"Time-of-day transaction velocity normalized ({hour}:00 hours).",
-                f"City population density matrix analyzed ({city_pop} local residents).",
-                f"Account holder employment sector cross-referenced ({job})."
-            ]
-            
-            for insight in base_insights:
-                # Add insight if we don't have enough explanations yet
-                if len(explanations) < 4:
-                    explanations.append(insight)
-                else:
-                    break
+    except Exception as e:
+        # Step 4: Global try/except (return 400 for unexpected errors)
+        traceback.print_exc()
+        return jsonify({"error": "Unexpected error", "detail": str(e)}), 400
 
         return jsonify({
             "prediction": prediction,
