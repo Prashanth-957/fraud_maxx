@@ -13,7 +13,7 @@ import {
   ReferenceLine, BarChart, Bar, Cell, ScatterChart, Scatter, ZAxis, Legend
 } from 'recharts';
 
-const BACKEND = 'https://web-production-9696a.up.railway.app';
+const BASE_URL = 'https://fraud-maxx.onrender.com';
 
 const CATEGORIES = [
   { value: 'grocery_pos', label: 'Grocery (POS)' },
@@ -79,11 +79,11 @@ export default function App() {
 
   // Check backend & fetch metrics on mount
   useEffect(() => {
-    fetch(`${BACKEND}/`)
+    fetch(`${BASE_URL}/`)
       .then(r => r.ok ? setBackendOnline(true) : setBackendOnline(false))
       .catch(() => setBackendOnline(false));
 
-    fetch(`${BACKEND}/metrics`)
+    fetch(`${BASE_URL}/metrics`)
       .then(r => r.json())
       .then(d => setMetrics(d))
       .catch(() => setMetrics(null));
@@ -120,7 +120,7 @@ export default function App() {
     let prediction = 0, probability = 0, explanation: string[] = [];
 
     try {
-      const res = await fetch(`${BACKEND}/predict`, {
+      const res = await fetch(`${BASE_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

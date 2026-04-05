@@ -10,6 +10,7 @@ import traceback
 app = Flask(__name__)
 # Enable CORS for Netlify frontend and local development
 CORS(app, origins=[
+    "https://fraud-maxx-2.onrender.com",
     "https://scintillating-taffy-24e8b5.netlify.app",
     "http://localhost:5173",
     "http://localhost:3000"
